@@ -1,5 +1,7 @@
 package main;
 
+import javax.swing.*;
+
 public class AVBABHMAI {
 
     // A
@@ -13,10 +15,50 @@ public class AVBABHMAI {
     // Intelligence
 
     public static void main(String[] args) {
-        AVBABHMAI network = new AVBABHMAI(3, 15, 5);
-        double[] input = {1, 2, 3};
-        double[] output = {0.1, 0.2, 0.3, 0.4, 0.5};
-        network.test(input, output);
+        AVBABHMAI network = new AVBABHMAI(2, 5, 1);
+        double[] case1 = {1, 1};
+        double[] case1output = {0};
+        double[] case2 = {1, 0};
+        double[] case2output = {1};
+        double[] case3 = {0, 1};
+        double[] case3output = {1};
+        double[] case4 = {0, 0};
+        double[] case4output = {0};
+
+        JFrame frame = new JFrame();
+        frame.setSize(600, 600);
+        JLabel c1 = new JLabel();
+        c1.setBounds(0, 100, 600, 100);
+        JLabel c2 = new JLabel();
+        c2.setBounds(0, 200, 600, 100);
+        JLabel c3 = new JLabel();
+        c3.setBounds(0, 300, 600, 100);
+        JLabel c4 = new JLabel();
+        c4.setBounds(0, 400, 600, 100);
+        frame.add(c1);
+        frame.add(c2);
+        frame.add(c3);
+        frame.add(c4);
+
+        frame.setVisible(true);
+
+        while(true) {
+            network.test(case1, case1output);
+            network.test(case2, case2output);
+            network.test(case3, case3output);
+            network.test(case4, case4output);
+            for(double x : network.feedForward(case1))
+                c1.setText(x + "");
+            for(double x : network.feedForward(case2))
+                c2.setText(x + "");
+            for(double x : network.feedForward(case3))
+                c3.setText(x + "");
+            for(double x : network.feedForward(case4))
+                c4.setText(x + "");
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {}
+        }
     }
 
     final int inputNum, hiddenNum, outputNum;
@@ -69,34 +111,34 @@ public class AVBABHMAI {
         //
 
         // Convert funtion inputs
+        Matrix trueInput = new Matrix(input);
         Matrix trueOutput = new Matrix(target);
         //
 
+        // Adjust for output weights
         Matrix error = Matrix.sub(trueOutput, outputGuess);
-
-        /*Matrix t_outputWeight = Matrix.transpose(outputWeight);
-        Matrix hiddenError = Matrix.matrixMult(t_outputWeight, error);*/
-
-        /*Matrix t_hiddenWeight = Matrix.transpose(hiddenWeight);
-        Matrix inputError = Matrix.matrixMult(t_hiddenWeight, new Matrix(removeBiasFromArray(hiddenError.toArray())));*/
-
         Matrix outputChange = new Matrix(outputGuess);
         outputChange.notReallyDSigmoid();
         outputChange = Matrix.mult(outputChange, error);
         outputChange = Matrix.mult(outputChange, learningRate);
-
         Matrix t_hiddenGuess = Matrix.transpose(new Matrix(addBiasToArray(hiddenGuess.toArray())));
         Matrix outputDeltas = Matrix.matrixMult(outputChange, t_hiddenGuess);
         outputWeight = Matrix.add(outputWeight, outputDeltas);
+        //
 
-        /*Matrix hiddenChange = new Matrix(hiddenGuess);
+        // Adjust for hidden weights
+        Matrix t_outputWeight = Matrix.transpose(outputWeight);
+        Matrix hiddenError = Matrix.matrixMult(t_outputWeight, error);
+        Matrix hiddenChange = new Matrix(addBiasToArray(hiddenGuess.toArray()));
         hiddenChange.notReallyDSigmoid();
         hiddenChange = Matrix.mult(hiddenChange, hiddenError);
-        hiddenChange = Matrix.mult(outputChange, learningRate);
-
-        Matrix t_input = Matrix.transpose(trueInput);
+        hiddenChange = Matrix.mult(hiddenChange, learningRate);
+        Matrix t_input = Matrix.transpose(new Matrix(addBiasToArray(trueInput.toArray())));
         Matrix hiddenDeltas = Matrix.matrixMult(hiddenChange, t_input);
-        hiddenWeight = Matrix.add(hiddenWeight, hiddenDeltas);*/
+        hiddenDeltas = Matrix.removeLastRow(hiddenDeltas);
+        hiddenWeight = Matrix.add(hiddenWeight, hiddenDeltas);
+        //
+
     }
 
     public double[] addBiasToArray(double[] array) {

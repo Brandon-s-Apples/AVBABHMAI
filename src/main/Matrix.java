@@ -171,4 +171,12 @@ public class Matrix {
         System.out.println(height);
     }
 
+    public static Matrix removeLastRow(Matrix m) {
+        Matrix retVal = new Matrix(m.width, m.height - 1);
+        for(int x = 0; x < retVal.width; x++)
+            for(int y = 0; y < retVal.height; y++)
+                retVal.set(x, y, m.get(x, y));
+            return retVal;
+    }
+
 }

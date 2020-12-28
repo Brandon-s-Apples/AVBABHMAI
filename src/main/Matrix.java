@@ -29,6 +29,15 @@ public class Matrix {
                 data[x][y] = matrix.get(x, y);
     }
 
+    public Matrix(double[] array) {
+        width = 1;
+        height = array.length;
+
+        data = new double[width][height];
+        for(int y = 0; y < height; y++)
+            data[0][y] = array[y];
+    }
+
     public double get(int x, int y) {
         return data[x][y];
     }
@@ -41,6 +50,14 @@ public class Matrix {
         data[x][y] += val;
     }
 
+    public void sub(int x, int y, double val) {
+        data[x][y] -= val;
+    }
+
+    public void mult(int x, int y , double val) {
+        data[x][y] *= val;
+    }
+
     public static Matrix add(Matrix m1, Matrix m2) {
         if(m1.width != m2.width || m1.height != m2.height)
             throw new RuntimeException("Matrix sizes do not match");
@@ -51,24 +68,76 @@ public class Matrix {
         return retVal;
     }
 
-    public static Matrix matrixProduct(Matrix m1, Matrix m2) {
-        if(m2.width == 1 && m1.height == m2.height) {
-            Matrix retVal = new Matrix(1, m1.width);
-            for(int index = 0; index < m1.width; index++) {
-                double sum = 0;
-                for(int pointer = 0; pointer < m1.height; pointer++)
-                    sum += m1.get(index, pointer) * m2.get(0, pointer);
-                retVal.set(0, index, sum);
-            }
+    public static Matrix sub(Matrix m1, Matrix m2) {
+        if(m1.width != m2.width || m1.height != m2.height)
+            throw new RuntimeException("Matrix sizes do not match");
+        Matrix retVal = new Matrix(m1);
+        for(int x = 0; x < retVal.width; x++)
+            for(int y = 0; y < retVal.height; y++)
+                retVal.sub(x, y, m2.get(x, y));
+        return retVal;
+    }
+
+    public static Matrix mult(Matrix m1, Matrix m2) {
+        if(m1.width != m2.width || m1.height != m2.height)
+            throw new RuntimeException("Matrix sizes do not match");
+        Matrix retVal = new Matrix(m1);
+        for(int x = 0; x < retVal.width; x++)
+            for(int y = 0; y < retVal.height; y++)
+                retVal.mult(x, y, m2.get(x, y));
+        return retVal;
+    }
+
+    public static Matrix matrixMult(Matrix m1, Matrix m2) {
+        if(m1.width == m2.height) {
+            Matrix retVal = new Matrix(m2.width, m1.height);
+            for(int x = 0; x < retVal.width; x++)
+                for(int y = 0; y < retVal.height; y++) {
+                    double sum = 0;
+                    for(int index = 0; index < m1.width; index++) {
+                        sum += m1.get(index, y) * m2.get(x, index);
+                    }
+                    retVal.set(x, y, sum);
+                }
             return retVal;
-        }
-        else throw new RuntimeException("Matrices not compatible");
+        } else throw new RuntimeException("Matrices not compatible");
     }
 
     public void randomize() {
         for(int x = 0; x < width; x++)
             for(int y = 0; y < height; y++)
                 set(x, y, (random.nextDouble() * 2) - 1);
+    }
+
+    public double[] toArray() {
+        if(width > 1)
+            throw new RuntimeException("Matrix cannot be converted");
+        else {
+            double[] retVal = new double[height];
+            for(int i = 0; i < height; i++)
+                retVal[i] = get(0, i);
+            return retVal;
+        }
+    }
+
+    public void sigmoid() {
+        for(int x = 0; x < width; x++)
+            for(int y = 0; y < height; y++)
+                set(x, y, sigmoid(get(x, y)));
+    }
+
+    public static double sigmoid(double val) {
+        return 1 / (1 + Math.pow(Math.E, -val));
+    }
+
+    public void print() {
+        for(int y = 0; y < height; y++){
+            for(int x = 0; x < width; x++) {
+                System.out.print(data[x][y] + " | ");
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
 }

@@ -66,6 +66,7 @@ public class AVBABHMAI {
         // Calculate transposed matrices
         Matrix t_outputWeight = Matrix.transpose(weightList[1]);
         Matrix t_hiddenGuess = Matrix.transpose(new Matrix(addBiasToArray(guess[0].toArray())));
+        Matrix t_input = Matrix.transpose(new Matrix(addBiasToArray(trueInput.toArray())));
 
         // Adjust for output weights
         Matrix error = Matrix.sub(trueOutput, guess[1]);
@@ -83,7 +84,6 @@ public class AVBABHMAI {
         hiddenChange.notReallyDSigmoid();
         hiddenChange = Matrix.mult(hiddenChange, hiddenError);
         hiddenChange = Matrix.mult(hiddenChange, learningRate);
-        Matrix t_input = Matrix.transpose(new Matrix(addBiasToArray(trueInput.toArray())));
         Matrix hiddenDeltas = Matrix.matrixMult(hiddenChange, t_input);
         hiddenDeltas = Matrix.removeLastRow(hiddenDeltas);
         weightList[0] = Matrix.add(weightList[0], hiddenDeltas);

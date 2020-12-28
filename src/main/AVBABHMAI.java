@@ -58,58 +58,42 @@ public class AVBABHMAI {
             throw new RuntimeException("Incorrect number of output");
 
         // Calculate guess - feedForward function
-        Matrix[] inputs = new Matrix[weightList.length + 1];
-        inputs[0] = new Matrix(input);
+        Matrix[] guess = new Matrix[weightList.length];
         Matrix prevOutput = new Matrix(addBiasToArray(input));
-        for(int index = 1; index < inputs.length; index++) {
-            inputs[index] = Matrix.matrixMult(weightList[index + 1], prevOutput);
-            inputs[index].sigmoid();
-            prevOutput = new Matrix(addBiasToArray(inputs[index].toArray()));
+        for(int index = 0; index < weightList.length; index++) {
+            guess[index] = Matrix.matrixMult(weightList[index], prevOutput);
+            guess[index].sigmoid();
+            prevOutput = new Matrix(addBiasToArray(guess[index].toArray()));
         }
 
         // Convert function inputs
+        Matrix givenInput = new Matrix(input);
         Matrix givenOutput = new Matrix(target);
 
         // Calculate transposed matrices
         Matrix[] t_weightList = new Matrix[weightList.length];
         for(int index = 0; index < weightList.length; index++)
             t_weightList[index] = Matrix.transpose(weightList[index]);
-        Matrix[] t_guess = new Matrix[inputs.length];
-        for(int index = 0; index < inputs.length; index++)
-            t_guess[index] = Matrix.transpose(new Matrix(addBiasToArray(inputs[index].toArray())));
 
+        Matrix t_outputWeight = Matrix.transpose(weightList[1]);
+        Matrix t_hiddenGuess = Matrix.transpose(new Matrix(addBiasToArray(guess[0].toArray())));
         Matrix t_input = Matrix.transpose(new Matrix(addBiasToArray(givenInput.toArray())));
 
-        Matrix error = Matrix.sub(givenOutput, inputs[1]);
-        Matrix nextInput = givenInput;
-
-        for(int index = weightList.length - 1; index >= 0; index++) {
-            Matrix currentError = error;
-            Matrix currentWeight = weightList[index];
-            Matrix currentInput = nextInput;
-
-            Matrix change = new Matrix(inputs[1]);
-            change.notReallyDSigmoid();
-            change = Matrix.mult(change, error);
-            change = Matrix.mult(change, learningRate);
-            Matrix outputDeltas = Matrix.matrixMult(change, t_guess[0]);
-            weightList[1] = Matrix.add(weightList[1], outputDeltas);
-        }
-
         // Adjust for output weights
-        Matrix outputChange = new Matrix(inputs[1]);
+        Matrix error = Matrix.sub(givenOutput, guess[1]);
+        Matrix outputChange = new Matrix(guess[1]);
         outputChange.notReallyDSigmoid();
         outputChange = Matrix.mult(outputChange, error);
         outputChange = Matrix.mult(outputChange, learningRate);
-        Matrix outputDeltas = Matrix.matrixMult(outputChange, t_guess[0]);
+        Matrix outputDeltas = Matrix.matrixMult(outputChange, t_hiddenGuess);
         weightList[1] = Matrix.add(weightList[1], outputDeltas);
         //
 
         // Adjust for hidden weights
-        error = Matrix.matrixMult(t_weightList[1], error);
-        Matrix hiddenChange = new Matrix(addBiasToArray(inputs[0].toArray()));
+        Matrix hiddenError = Matrix.matrixMult(t_weightList[1], error);
+        Matrix hiddenChange = new Matrix(addBiasToArray(guess[0].toArray()));
         hiddenChange.notReallyDSigmoid();
-        hiddenChange = Matrix.mult(hiddenChange, error);
+        hiddenChange = Matrix.mult(hiddenChange, hiddenError);
         hiddenChange = Matrix.mult(hiddenChange, learningRate);
         Matrix hiddenDeltas = Matrix.matrixMult(hiddenChange, t_input);
         hiddenDeltas = Matrix.removeLastRow(hiddenDeltas);

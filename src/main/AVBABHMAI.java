@@ -27,6 +27,8 @@ public class AVBABHMAI {
 
         JFrame frame = new JFrame();
         frame.setSize(600, 600);
+        frame.setLayout(null);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         JLabel c1 = new JLabel();
         c1.setBounds(0, 100, 600, 100);
         JLabel c2 = new JLabel();
@@ -48,15 +50,15 @@ public class AVBABHMAI {
             network.test(case3, case3output);
             network.test(case4, case4output);
             for(double x : network.feedForward(case1))
-                c1.setText(x + "");
+                c1.setText("c1: " + x);
             for(double x : network.feedForward(case2))
-                c2.setText(x + "");
+                c2.setText("c2: " + x);
             for(double x : network.feedForward(case3))
-                c3.setText(x + "");
+                c3.setText("c3: " + x);
             for(double x : network.feedForward(case4))
-                c4.setText(x + "");
+                c4.setText("c4: " + x);
             try {
-                Thread.sleep(10);
+                Thread.sleep(1);
             } catch (InterruptedException e) {}
         }
     }

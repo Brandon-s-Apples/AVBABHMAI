@@ -14,85 +14,36 @@ public class AVBABHMAI {
     // Artificial
     // Intelligence
 
-    public static void main(String[] args) {
-        AVBABHMAI network = new AVBABHMAI(2, 5, 1);
-        double[] case1 = {1, 1};
-        double[] case1output = {0};
-        double[] case2 = {1, 0};
-        double[] case2output = {1};
-        double[] case3 = {0, 1};
-        double[] case3output = {1};
-        double[] case4 = {0, 0};
-        double[] case4output = {0};
-
-        JFrame frame = new JFrame();
-        frame.setSize(600, 600);
-        frame.setLayout(null);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        JLabel c1 = new JLabel();
-        c1.setBounds(0, 100, 600, 100);
-        JLabel c2 = new JLabel();
-        c2.setBounds(0, 200, 600, 100);
-        JLabel c3 = new JLabel();
-        c3.setBounds(0, 300, 600, 100);
-        JLabel c4 = new JLabel();
-        c4.setBounds(0, 400, 600, 100);
-        frame.add(c1);
-        frame.add(c2);
-        frame.add(c3);
-        frame.add(c4);
-
-        frame.setVisible(true);
-
-        while(true) {
-            network.test(case1, case1output);
-            network.test(case2, case2output);
-            network.test(case3, case3output);
-            network.test(case4, case4output);
-            for(double x : network.feedForward(case1))
-                c1.setText("c1: " + x);
-            for(double x : network.feedForward(case2))
-                c2.setText("c2: " + x);
-            for(double x : network.feedForward(case3))
-                c3.setText("c3: " + x);
-            for(double x : network.feedForward(case4))
-                c4.setText("c4: " + x);
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {}
-        }
-    }
-
     final int inputNum, hiddenNum, outputNum;
 
-    double learningRate = 0.1;
+    Matrix[] weightList;
 
-    Matrix hiddenWeight;
-    Matrix outputWeight;
+    double learningRate = 0.1;
 
     public AVBABHMAI(int numOfInput, int numOfHidden, int numOfOutput) {
         inputNum = numOfInput;
         hiddenNum = numOfHidden;
         outputNum = numOfOutput;
 
-        hiddenWeight = new Matrix(inputNum + 1, hiddenNum);
-        outputWeight = new Matrix(hiddenNum + 1, outputNum);
+        weightList = new Matrix[2];
+        weightList[0] = new Matrix(inputNum + 1, hiddenNum);
+        weightList[1] = new Matrix(hiddenNum + 1, outputNum);
 
-        hiddenWeight.randomize();
-        outputWeight.randomize();
+        weightList[0].randomize();
+        weightList[1].randomize();
     }
 
     public double[] feedForward(double[] input) {
         if(input.length != inputNum)
             throw new RuntimeException("Incorrect number of inputs");
 
-        Matrix o1 = Matrix.matrixMult(hiddenWeight, new Matrix(addBiasToArray(input)));
-        o1.sigmoid();
+        Matrix[] guess = new Matrix[weightList.length];
+        guess[0] = Matrix.matrixMult(weightList[0], new Matrix(addBiasToArray(input)));
+        guess[0].sigmoid();
+        guess[1] = Matrix.matrixMult(weightList[1], new Matrix(addBiasToArray(guess[0].toArray())));
+        guess[1].sigmoid();
 
-        Matrix output = Matrix.matrixMult(outputWeight, new Matrix(addBiasToArray(o1.toArray())));
-        output.sigmoid();
-
-        return output.toArray();
+        return guess[1].toArray();
     }
 
     public void test(double[] input, double[] target) {
@@ -101,44 +52,41 @@ public class AVBABHMAI {
         if(target.length != outputNum)
             throw new RuntimeException("Incorrect number of output");
 
-        /*for(double x : feedForward(new double[] {5, 5, 5}))
-            System.out.println(x);
-        System.out.println();*/
-
         // Calculate guess - feedForward function
-        Matrix hiddenGuess = Matrix.matrixMult(hiddenWeight, new Matrix(addBiasToArray(input)));
-        hiddenGuess.sigmoid();
-        Matrix outputGuess = Matrix.matrixMult(outputWeight, new Matrix(addBiasToArray(hiddenGuess.toArray())));
-        outputGuess.sigmoid();
-        //
+        Matrix[] guess = new Matrix[weightList.length];
+        guess[0] = Matrix.matrixMult(weightList[0], new Matrix(addBiasToArray(input)));
+        guess[0].sigmoid();
+        guess[1] = Matrix.matrixMult(weightList[1], new Matrix(addBiasToArray(guess[0].toArray())));
+        guess[1].sigmoid();
 
-        // Convert funtion inputs
+        // Convert function inputs
         Matrix trueInput = new Matrix(input);
         Matrix trueOutput = new Matrix(target);
-        //
+
+        // Calculate transposed matrices
+        Matrix t_outputWeight = Matrix.transpose(weightList[1]);
+        Matrix t_hiddenGuess = Matrix.transpose(new Matrix(addBiasToArray(guess[0].toArray())));
 
         // Adjust for output weights
-        Matrix error = Matrix.sub(trueOutput, outputGuess);
-        Matrix outputChange = new Matrix(outputGuess);
+        Matrix error = Matrix.sub(trueOutput, guess[1]);
+        Matrix outputChange = new Matrix(guess[1]);
         outputChange.notReallyDSigmoid();
         outputChange = Matrix.mult(outputChange, error);
         outputChange = Matrix.mult(outputChange, learningRate);
-        Matrix t_hiddenGuess = Matrix.transpose(new Matrix(addBiasToArray(hiddenGuess.toArray())));
         Matrix outputDeltas = Matrix.matrixMult(outputChange, t_hiddenGuess);
-        outputWeight = Matrix.add(outputWeight, outputDeltas);
+        weightList[1] = Matrix.add(weightList[1], outputDeltas);
         //
 
         // Adjust for hidden weights
-        Matrix t_outputWeight = Matrix.transpose(outputWeight);
         Matrix hiddenError = Matrix.matrixMult(t_outputWeight, error);
-        Matrix hiddenChange = new Matrix(addBiasToArray(hiddenGuess.toArray()));
+        Matrix hiddenChange = new Matrix(addBiasToArray(guess[0].toArray()));
         hiddenChange.notReallyDSigmoid();
         hiddenChange = Matrix.mult(hiddenChange, hiddenError);
         hiddenChange = Matrix.mult(hiddenChange, learningRate);
         Matrix t_input = Matrix.transpose(new Matrix(addBiasToArray(trueInput.toArray())));
         Matrix hiddenDeltas = Matrix.matrixMult(hiddenChange, t_input);
         hiddenDeltas = Matrix.removeLastRow(hiddenDeltas);
-        hiddenWeight = Matrix.add(hiddenWeight, hiddenDeltas);
+        weightList[0] = Matrix.add(weightList[0], hiddenDeltas);
         //
 
     }

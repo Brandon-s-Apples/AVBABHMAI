@@ -14,20 +14,23 @@ public class AVBABHMAI {
     // Artificial
     // Intelligence
 
-    final int inputNum, hiddenNum, outputNum;
+    final int inputNum, outputNum;
+    final int[] hiddenNum;
 
     Matrix[] weightList;
 
     double learningRate = 0.1;
 
-    public AVBABHMAI(int numOfInput, int numOfHidden, int numOfOutput) {
+    public AVBABHMAI(int numOfInput, int[] numOfHidden, int numOfOutput) {
         inputNum = numOfInput;
-        hiddenNum = numOfHidden;
+        hiddenNum = new int[numOfHidden.length];
+        for(int index = 0; index < hiddenNum.length; index++)
+            hiddenNum[index] = numOfHidden[index];
         outputNum = numOfOutput;
 
         weightList = new Matrix[2];
-        weightList[0] = new Matrix(inputNum + 1, hiddenNum);
-        weightList[1] = new Matrix(hiddenNum + 1, outputNum);
+        weightList[0] = new Matrix(inputNum + 1, hiddenNum[0]);
+        weightList[1] = new Matrix(hiddenNum[0] + 1, outputNum);
 
         weightList[0].randomize();
         weightList[1].randomize();
@@ -38,12 +41,14 @@ public class AVBABHMAI {
             throw new RuntimeException("Incorrect number of inputs");
 
         Matrix[] guess = new Matrix[weightList.length];
-        guess[0] = Matrix.matrixMult(weightList[0], new Matrix(addBiasToArray(input)));
-        guess[0].sigmoid();
-        guess[1] = Matrix.matrixMult(weightList[1], new Matrix(addBiasToArray(guess[0].toArray())));
-        guess[1].sigmoid();
+        Matrix prevOutput = new Matrix(addBiasToArray(input));
+        for(int index = 0; index < weightList.length; index++) {
+            guess[index] = Matrix.matrixMult(weightList[index], prevOutput);
+            guess[index].sigmoid();
+            prevOutput = new Matrix(addBiasToArray(guess[index].toArray()));
+        }
 
-        return guess[1].toArray();
+        return guess[guess.length - 1].toArray();
     }
 
     public void test(double[] input, double[] target) {

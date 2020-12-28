@@ -52,8 +52,17 @@ public class Matrix {
     }
 
     public static Matrix matrixProduct(Matrix m1, Matrix m2) {
-        if(m2.width == 1 && m1.height == m2.height) {}
-        else throw RuntimeException("Matrices not compatible");
+        if(m2.width == 1 && m1.height == m2.height) {
+            Matrix retVal = new Matrix(1, m1.width);
+            for(int index = 0; index < m1.width; index++) {
+                double sum = 0;
+                for(int pointer = 0; pointer < m1.height; pointer++)
+                    sum += m1.get(index, pointer) * m2.get(0, pointer);
+                retVal.set(0, index, sum);
+            }
+            return retVal;
+        }
+        else throw new RuntimeException("Matrices not compatible");
     }
 
 }

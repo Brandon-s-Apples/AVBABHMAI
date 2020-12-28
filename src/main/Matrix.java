@@ -54,7 +54,7 @@ public class Matrix {
         data[x][y] -= val;
     }
 
-    public void mult(int x, int y , double val) {
+    public void mult(int x, int y, double val) {
         data[x][y] *= val;
     }
 
@@ -85,6 +85,14 @@ public class Matrix {
         for(int x = 0; x < retVal.width; x++)
             for(int y = 0; y < retVal.height; y++)
                 retVal.mult(x, y, m2.get(x, y));
+        return retVal;
+    }
+
+    public static Matrix mult(Matrix m1, double scalar) {
+        Matrix retVal = new Matrix(m1);
+        for(int x = 0; x < retVal.width; x++)
+            for(int y = 0; y < retVal.height; y++)
+                retVal.mult(x, y, scalar);
         return retVal;
     }
 
@@ -130,14 +138,37 @@ public class Matrix {
         return 1 / (1 + Math.pow(Math.E, -val));
     }
 
+    public void notReallyDSigmoid() {
+        for(int x = 0; x < width; x++)
+            for(int y = 0; y < height; y++)
+                set(x, y, notReallyDSigmoid(get(x, y)));
+    }
+
+    public static double notReallyDSigmoid(double alreadySigmoidedVal) {
+        return alreadySigmoidedVal * (1 - alreadySigmoidedVal);
+    }
+
     public void print() {
-        for(int y = 0; y < height; y++){
+        for(int y = 0; y < height; y++) {
             for(int x = 0; x < width; x++) {
                 System.out.print(data[x][y] + " | ");
             }
             System.out.println();
         }
         System.out.println();
+    }
+
+    public static Matrix transpose(Matrix m) {
+        Matrix retVal = new Matrix(m.height, m.width);
+        for(int x = 0; x < m.width; x++)
+            for(int y = 0; y < m.height; y++)
+                retVal.set(y, x, m.get(x, y));
+        return retVal;
+    }
+
+    public void printSize() {
+        System.out.println(width);
+        System.out.println(height);
     }
 
 }

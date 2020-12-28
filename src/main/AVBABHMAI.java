@@ -16,4 +16,19 @@ public class AVBABHMAI {
 
     }
 
+    final int inputNum, hiddenNum, outputNum;
+
+    Matrix hiddenWeight;
+    Matrix outputWeight;
+
+    public AVBABHMAI(int numOfInput, int numOfHidden, int numOfOutput) {
+        inputNum = numOfInput;
+        hiddenNum = numOfHidden;
+        outputNum = numOfOutput;
+
+        hiddenWeight = new Matrix(hiddenNum, inputNum);
+        outputWeight = new Matrix(outputNum, hiddenNum);
+
+    }
+
 }

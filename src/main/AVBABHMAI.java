@@ -59,28 +59,22 @@ public class AVBABHMAI {
 
         // Calculate guess - feedForward function
         Matrix[] guess = new Matrix[weightList.length];
-        Matrix prevOutput = new Matrix(addBiasToArray(input));
-        for(int index = 0; index < weightList.length; index++) {
-            guess[index] = Matrix.matrixMult(weightList[index], prevOutput);
-            guess[index].sigmoid();
-            prevOutput = new Matrix(addBiasToArray(guess[index].toArray()));
-        }
+        guess[0] = Matrix.matrixMult(weightList[0], new Matrix(addBiasToArray(input)));
+        guess[0].sigmoid();
+        guess[1] = Matrix.matrixMult(weightList[1], new Matrix(addBiasToArray(guess[0].toArray())));
+        guess[1].sigmoid();
 
         // Convert function inputs
-        Matrix givenInput = new Matrix(input);
-        Matrix givenOutput = new Matrix(target);
+        Matrix trueInput = new Matrix(input);
+        Matrix trueOutput = new Matrix(target);
 
         // Calculate transposed matrices
-        Matrix[] t_weightList = new Matrix[weightList.length];
-        for(int index = 0; index < weightList.length; index++)
-            t_weightList[index] = Matrix.transpose(weightList[index]);
-
         Matrix t_outputWeight = Matrix.transpose(weightList[1]);
         Matrix t_hiddenGuess = Matrix.transpose(new Matrix(addBiasToArray(guess[0].toArray())));
-        Matrix t_input = Matrix.transpose(new Matrix(addBiasToArray(givenInput.toArray())));
+        Matrix t_input = Matrix.transpose(new Matrix(addBiasToArray(trueInput.toArray())));
 
         // Adjust for output weights
-        Matrix error = Matrix.sub(givenOutput, guess[1]);
+        Matrix error = Matrix.sub(trueOutput, guess[1]);
         Matrix outputChange = new Matrix(guess[1]);
         outputChange.notReallyDSigmoid();
         outputChange = Matrix.mult(outputChange, error);
@@ -90,7 +84,7 @@ public class AVBABHMAI {
         //
 
         // Adjust for hidden weights
-        Matrix hiddenError = Matrix.matrixMult(t_weightList[1], error);
+        Matrix hiddenError = Matrix.matrixMult(t_outputWeight, error);
         Matrix hiddenChange = new Matrix(addBiasToArray(guess[0].toArray()));
         hiddenChange.notReallyDSigmoid();
         hiddenChange = Matrix.mult(hiddenChange, hiddenError);

@@ -65,4 +65,10 @@ public class Matrix {
         else throw new RuntimeException("Matrices not compatible");
     }
 
+    public void randomize() {
+        for(int x = 0; x < width; x++)
+            for(int y = 0; y < height; y++)
+                set(x, y, (random.nextDouble() * 2) - 1);
+    }
+
 }

@@ -68,6 +68,15 @@ public class Matrix {
         return retVal;
     }
 
+    public Matrix add(Matrix m) {
+        if(width != m.width || height != m.height)
+            throw new RuntimeException("Matrix sizes do not match");
+        for(int x = 0; x < width; x++)
+            for(int y = 0; y < height; y++)
+                add(x, y, m.get(x, y));
+        return this;
+    }
+
     public static Matrix sub(Matrix m1, Matrix m2) {
         if(m1.width != m2.width || m1.height != m2.height)
             throw new RuntimeException("Matrix sizes do not match");

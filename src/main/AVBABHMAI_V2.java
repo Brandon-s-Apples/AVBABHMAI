@@ -52,12 +52,11 @@ public class AVBABHMAI_V2 {
             Matrix derivative = new Matrix(guesses[i + 1]);
             derivative.notReallyDSigmoid();
             Matrix t_input = Matrix.transpose(addBias(guesses[i]));
-            Matrix.mult(error, derivative);
             Matrix delta = Matrix.matrixMult(Matrix.mult(Matrix.mult(error, derivative), learningRate), t_input);
 
             error = Matrix.removeLastRow(Matrix.matrixMult(Matrix.transpose(weightList[i]), error));
 
-            weightList[i] = Matrix.add(weightList[i], delta);
+            weightList[i].add(delta);
         }
 
         return new double[1];

@@ -5,7 +5,7 @@ import javax.swing.*;
 public class Main {
 
     public static void main(String[] args) {
-        AVBABHMAI_V2 nn = new AVBABHMAI_V2(2, new int[] {5, 4, 3, 2}, 1);
+        AVBABHMAI nn = new AVBABHMAI(2, new int[] {5, 4, 3, 2}, 1);
 
         double[] case1 = {1, 1};
         double[] case1output = {0};

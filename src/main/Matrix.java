@@ -167,8 +167,7 @@ public class Matrix {
     }
 
     public void printSize() {
-        System.out.println(width);
-        System.out.println(height);
+        System.out.println(width + ", " + height);
     }
 
     public static Matrix removeLastRow(Matrix m) {

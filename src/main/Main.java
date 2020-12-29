@@ -5,7 +5,8 @@ import javax.swing.*;
 public class Main {
 
     public static void main(String[] args) {
-        AVBABHMAI network = new AVBABHMAI(2, 5, 1);
+        AVBABHMAI_V2 nn = new AVBABHMAI_V2(2, new int[] {5, 4, 3, 2}, 1);
+
         double[] case1 = {1, 1};
         double[] case1output = {0};
         double[] case2 = {1, 0};
@@ -35,17 +36,17 @@ public class Main {
         frame.setVisible(true);
 
         while(true) {
-            network.test(case1, case1output);
-            network.test(case2, case2output);
-            network.test(case3, case3output);
-            network.test(case4, case4output);
-            for(double x : network.feedForward(case1))
+            nn.train(case1, case1output);
+            nn.train(case2, case2output);
+            nn.train(case3, case3output);
+            nn.train(case4, case4output);
+            for(double x : nn.feedForward(case1))
                 c1.setText("c1: " + x);
-            for(double x : network.feedForward(case2))
+            for(double x : nn.feedForward(case2))
                 c2.setText("c2: " + x);
-            for(double x : network.feedForward(case3))
+            for(double x : nn.feedForward(case3))
                 c3.setText("c3: " + x);
-            for(double x : network.feedForward(case4))
+            for(double x : nn.feedForward(case4))
                 c4.setText("c4: " + x);
             try {
                 Thread.sleep(1);
